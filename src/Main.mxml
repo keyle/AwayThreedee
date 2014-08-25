@@ -1,0 +1,167 @@
+<?xml version="1.0"?>
+<s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
+                       xmlns:s="library://ns.adobe.com/flex/spark"
+                       backgroundAlpha="0"
+                       addedToStage="addedToStage()" showStatusBar="false" frameRate="120">
+
+    <fx:Script><![CDATA[
+        import away3d.cameras.lenses.PerspectiveLens;
+        import away3d.containers.View3D;
+        import away3d.entities.Mesh;
+        import away3d.materials.TextureMaterial;
+        import away3d.primitives.CubeGeometry;
+        import away3d.primitives.PlaneGeometry;
+        import away3d.primitives.WireframeCube;
+        import away3d.utils.Cast;
+
+        import mx.core.UIComponent;
+        import mx.events.FlexEvent;
+
+        //plane texture
+        [Embed(source="wheel.png")]
+        public static var FloorDiffuse:Class;
+
+        [Embed(source="wheel.png")]
+        public static var T:Class;
+
+        [Embed(source="floor_diffuse.jpg")]
+        public static var UV:Class;
+
+        [Embed(source="test.png")]
+        public static var TEST:Class;
+
+        //engine variables
+        private var view:View3D;
+
+        //scene objects
+        private var plane:Mesh;
+
+        private var cube:CubeGeometry;
+        private var cubeMesh:Mesh;
+
+        private function addedToStage():void
+        {
+            stage.scaleMode = StageScaleMode.NO_SCALE;
+            stage.align = StageAlign.TOP_LEFT;
+            stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+            stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp, false, 0, true);
+
+            stage.quality = StageQuality.LOW;
+            //setup the view
+            view = new View3D();
+            //            view.antiAlias = 2;
+            view.backgroundColor = 0xab7d50;
+
+            var container:UIComponent = new UIComponent();
+            addElement(container);
+            container.addChild(view);
+
+            //setup the camera
+            view.camera.z = -1000;
+            view.camera.y = 2000;
+            view.camera.lookAt(new Vector3D());
+            view.camera.lens = new PerspectiveLens(40);
+
+            //setup the scene
+            plane = new Mesh(new PlaneGeometry(3000, 3000, 60, 60), new TextureMaterial(Cast.bitmapTexture(FloorDiffuse)));
+            plane.geometry.scaleUV(12, 12);
+            plane.material.repeat = true;
+            plane.y = -50;
+            view.scene.addChild(plane);
+
+            var material:TextureMaterial = new TextureMaterial(Cast.bitmapTexture(TEST));
+
+            cube = new CubeGeometry(100, 100, 100);
+            cube.tile6 = false;
+            cubeMesh = new Mesh(cube, material);
+
+            view.scene.addChild(cubeMesh);
+
+            var mesh2:Mesh = new Mesh(cube, material);
+            mesh2.x = -100;
+            view.scene.addChild(mesh2);
+
+            var mesh3:Mesh = new Mesh(cube, material);
+            mesh3.z = -100;
+            view.scene.addChild(mesh3);
+
+
+            stage.addEventListener(Event.ENTER_FRAME, onFrame);
+            stage.addEventListener(Event.RESIZE, onResize);
+            stage.addEventListener(MouseEvent.MOUSE_DOWN, onmousedown);
+            stage.addEventListener(MouseEvent.MOUSE_UP, onmouseup);
+
+            view.camera.position = campos;
+            view.camera.moveBackward(2000);
+
+
+            onResize();
+        }
+
+        private var mousePressed:Boolean;
+        private var campos:Vector3D = new Vector3D();
+
+        private function onmouseup(event:MouseEvent):void
+        {
+            mousePressed = false;
+        }
+
+        private function onmousedown(event:MouseEvent):void
+        {
+            mousePressed = true;
+        }
+
+        private function onResize(e:Event = null):void
+        {
+            view.width = stage.stageWidth;
+            view.height = stage.stageHeight;
+        }
+
+        private function onFrame(event:Event):void
+        {
+            //            plane.rotationY -= 0.5;
+            //            cubeMesh.rotationY -= 1;
+            //            cubeMesh.rotationX -= 0.24;
+
+
+            if (mousePressed) {
+                view.camera.position = new Vector3D();
+                view.camera.moveBackward(2000);
+                view.camera.rotationX -= 0.5 * (stage.mouseY - stage.stageHeight / 2) / 500;
+                view.camera.rotationY -= 0.5 * (stage.mouseX - stage.stageWidth / 2) / 600;
+            }
+            else {
+
+                //                view.camera.position = new Vector3D();
+                //                view.camera.moveBackward(2000);
+                view.camera.x += 0.5 * (stage.mouseX - stage.stageWidth / 2) / 40;
+                view.camera.z -= 0.5 * (stage.mouseY - stage.stageHeight / 2) / 30;
+            }
+
+            view.render();
+        }
+
+        private function onKeyUp(event:KeyboardEvent):void
+        {
+            if (event.keyCode == Keyboard.ESCAPE) {
+                if (NativeApplication.nativeApplication) {
+                    NativeApplication.nativeApplication.exit();
+                }
+            }
+
+            if (event.keyCode == Keyboard.F && event.ctrlKey) {
+                if (NativeApplication.nativeApplication) {
+                    if (stage.displayState == StageDisplayState.NORMAL)
+                        stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
+                    else
+                        stage.displayState = StageDisplayState.NORMAL;
+
+                }
+            }
+        }
+        ]]></fx:Script>
+
+    <!--<s:Button label="Hello Flex world" verticalCenter="150" horizontalCenter="120" depth="150" height="35"-->
+    <!--alpha="1.0" />-->
+
+</s:WindowedApplication>

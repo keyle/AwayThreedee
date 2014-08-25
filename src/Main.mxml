@@ -18,6 +18,7 @@
         import mx.core.UIComponent;
         import mx.events.FlexEvent;
 
+
         //plane texture
         [Embed(source="wheel.png")]
         public static var FloorDiffuse:Class;
@@ -66,6 +67,8 @@
             view.camera.y = 2000;
             view.camera.lookAt(new Vector3D());
             view.camera.lens = new PerspectiveLens(40);
+            view.camera.lens.near = 100;
+            view.camera.lens.far = 8000;
 
             //setup the scene
             plane = new Mesh(new PlaneGeometry(3000, 3000), new TextureMaterial(Cast.bitmapTexture(FloorDiffuse)));

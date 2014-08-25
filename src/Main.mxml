@@ -2,11 +2,12 @@
 <s:WindowedApplication xmlns:fx="http://ns.adobe.com/mxml/2009"
                        xmlns:s="library://ns.adobe.com/flex/spark"
                        backgroundAlpha="0"
-                       addedToStage="addedToStage()" showStatusBar="false" frameRate="120">
+                       addedToStage="addedToStage()" showStatusBar="false" frameRate="80">
 
     <fx:Script><![CDATA[
         import away3d.cameras.lenses.PerspectiveLens;
         import away3d.containers.View3D;
+        import away3d.debug.AwayStats;
         import away3d.entities.Mesh;
         import away3d.materials.TextureMaterial;
         import away3d.primitives.CubeGeometry;
@@ -46,7 +47,6 @@
             stage.displayState = StageDisplayState.FULL_SCREEN_INTERACTIVE;
             stage.addEventListener(KeyboardEvent.KEY_UP, onKeyUp, false, 0, true);
 
-            stage.quality = StageQuality.LOW;
             //setup the view
             view = new View3D();
             //            view.antiAlias = 2;
@@ -56,6 +56,11 @@
             addElement(container);
             container.addChild(view);
 
+
+            var stats:AwayStats = new AwayStats(view);
+            stats.x = stage.stageWidth - stats.width;
+            container.addChild(stats);
+
             //setup the camera
             view.camera.z = -1000;
             view.camera.y = 2000;
@@ -63,7 +68,7 @@
             view.camera.lens = new PerspectiveLens(40);
 
             //setup the scene
-            plane = new Mesh(new PlaneGeometry(3000, 3000, 60, 60), new TextureMaterial(Cast.bitmapTexture(FloorDiffuse)));
+            plane = new Mesh(new PlaneGeometry(3000, 3000), new TextureMaterial(Cast.bitmapTexture(FloorDiffuse)));
             plane.geometry.scaleUV(12, 12);
             plane.material.repeat = true;
             plane.y = -50;
